@@ -1,29 +1,35 @@
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
+from models import SensorData, Soil, Parameter, SoilParameterList
 import aiomysql
 from datetime import datetime
+import paho.mqtt.client as mqtt
+import threading
 
 app = FastAPI()
 
-class Soil(BaseModel):
-    Soil_ID: str
-    Soil_Name: str
-    Loc_Longitude: float
-    Loc_Latitude: float
+latest_sensor_data: Optional[SensorData] = None
 
-class Parameter(BaseModel):
-    Parameter_ID: str
-    Soil_ID: str
-    Hum: float
-    Temp: float
-    Ec: float
-    Ph: float
-    Date_Recorded: str
+# MQTT Setup
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+    client.subscribe("get_data")
 
-class SoilParameterList(BaseModel):
-    Soil: Soil
-    Parameters: List[Parameter]
+def on_message(client, userdata, msg):
+    global latest_sensor_data
+    # print(f"Received message: {msg.payload}")
+    # # Assuming data is send as JSON string
+    import json
+    # latest_sensor_data = json.loads(msg.payload.decode())
+    payload = json.loads(msg.payload.decode())
+    latest_sensor_data = SensorData(**payload)
+
+def mqtt_thread():
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect("localhost", 1883, 60)
+    client.loop_forever()
 
 async def get_db():
     async with aiomysql.connect(
@@ -45,9 +51,20 @@ def formatDate(iso_date):
     formatted = date.strftime("%b %d, %Y %I:%M %p")
     return formatted
 
+@app.on_event("startup")
+def startup_event():
+    thread = threading.Thread(target=mqtt_thread)
+    thread.start()
+
 @app.get("/")
 def root():
     return {"Hello":"World"}
+
+@app.get("/get-sensor-data", response_model=SensorData)
+def get_sensor_data() -> SensorData:
+    if latest_sensor_data is None:
+        return {"Error": "No sensor data received yet."}
+    return latest_sensor_data
 
 # Get all soils
 @app.get("/soils", response_model=List[Soil])
