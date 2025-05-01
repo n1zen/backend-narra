@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 class SensorData(BaseModel):
-    humidity: float
-    temperature: float
-    ec: float
-    ph: float
+    Moist: float
+    Temp: float
+    EC: float
+    pH: float
 
 class Soil(BaseModel):
     Soil_ID: str
