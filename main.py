@@ -1,29 +1,10 @@
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
+from models import SensorData, Soil, Parameter, SoilParameterList
 import aiomysql
 from datetime import datetime
 
 app = FastAPI()
-
-class Soil(BaseModel):
-    Soil_ID: str
-    Soil_Name: str
-    Loc_Longitude: float
-    Loc_Latitude: float
-
-class Parameter(BaseModel):
-    Parameter_ID: str
-    Soil_ID: str
-    Hum: float
-    Temp: float
-    Ec: float
-    Ph: float
-    Date_Recorded: str
-
-class SoilParameterList(BaseModel):
-    Soil: Soil
-    Parameters: List[Parameter]
 
 async def get_db():
     async with aiomysql.connect(
