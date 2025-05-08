@@ -25,3 +25,18 @@ class Parameter(BaseModel):
 class SoilParameterList(BaseModel):
     Soil: Soil
     Parameters: List[Parameter]
+
+class ParameterCreate(BaseModel):
+    Hum: float
+    Temp: float
+    Ec: float
+    Ph: float
+
+class SoilCreate(BaseModel):
+    Soil_Name: str
+    Loc_Longitude: float
+    Loc_Latitude: float    
+
+class CreateItem(BaseModel):
+    Soil: SoilCreate
+    Parameters: ParameterCreate

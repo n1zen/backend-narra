@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from models import SensorData, Soil, Parameter, SoilParameterList
+from models import SensorData, Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem
 import aiomysql
 from datetime import datetime
 
@@ -115,3 +115,22 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Parameters = [parameter]
         )
         return soil_parameter
+
+@app.post('/create/soil/', response_model=CreateItem)
+async def create_soil(item: CreateItem, db=Depends(get_db)):
+    async with db.cursor() as cur:
+        await cur.execute(
+            "INSERT INTO Soils (Soil_Name, Soil_Location) VALUES (%s, ST_GeomFromText('POINT(%s %s)', 4326))",
+            (item.Soil.Soil_Name, item.Soil.Loc_Longitude, item.Soil.Loc_Latitude)
+        )
+        await db.commit()
+        await cur.execute(
+            "SELECT LAST_INSERT_ID()"
+        )
+        id_of_Soil = await cur.fetchone()
+        await cur.execute(
+            "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
+            (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph)
+        )
+        await db.commit()
+        return item
