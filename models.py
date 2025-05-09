@@ -40,3 +40,10 @@ class SoilCreate(BaseModel):
 class CreateItem(BaseModel):
     Soil: SoilCreate
     Parameters: ParameterCreate
+
+class AddParameter(BaseModel):
+    Soil_ID: int
+    Hum: float
+    Temp: float
+    Ec: float
+    Ph: float
