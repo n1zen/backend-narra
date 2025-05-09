@@ -150,7 +150,7 @@ async def create_parameter(item: AddParameter, db=Depends(get_db)):
         try:
             await cur.execute(
                 "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
-                (item.Soil_ID, item.Hum, item.Temp, item.Ec, item.Ph)
+                (item.Soil_ID, item.Parameter.Hum, item.Parameter.Temp, item.Parameter.Ec, item.Parameter.Ph)
             )
             await db.commit()
             return item

@@ -43,10 +43,7 @@ class CreateItem(BaseModel):
 
 class AddParameter(BaseModel):
     Soil_ID: int
-    Hum: float
-    Temp: float
-    Ec: float
-    Ph: float
+    Parameter: ParameterCreate
 
 class DeleteParameter(BaseModel):
     Parameter_ID: int
