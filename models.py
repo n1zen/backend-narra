@@ -47,3 +47,12 @@ class AddParameter(BaseModel):
     Temp: float
     Ec: float
     Ph: float
+
+class DeleteParameter(BaseModel):
+    Parameter_ID: int
+
+class DeleteSoil(BaseModel):
+    Soil_ID: int
+
+class DeleteResponse(BaseModel):
+    message: str

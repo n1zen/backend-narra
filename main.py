@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from models import SensorData, Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem, AddParameter
+from models import SensorData, Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem, AddParameter, DeleteParameter, DeleteResponse
 import aiomysql
 from datetime import datetime
 
@@ -157,3 +157,25 @@ async def create_parameter(item: AddParameter, db=Depends(get_db)):
         except Exception as e:
             await db.rollback()
             raise HTTPException(status_code=500, detail=f"Failed to create parameter: {str(e)}")
+
+@app.delete("/delete/soil/{Soil_ID}", response_model=DeleteResponse)
+async def delete_soil(Soil_ID: int, db=Depends(get_db)) -> DeleteResponse:
+    async with db.cursor() as cur:
+        await cur.execute("SELECT Soil_ID FROM Soils WHERE Soil_ID = %s", (Soil_ID,))
+        if not await cur.fetchone():
+            raise HTTPException(status_code=404, detail="Soil not found")
+        await cur.execute("DELETE FROM Parameters WHERE Soil_ID = %s", (Soil_ID,))
+        await db.commit()
+        await cur.execute("DELETE FROM Soils WHERE Soil_ID = %s", (Soil_ID,))
+        await db.commit()
+        return DeleteResponse(message="Soil deleted successfully")
+
+@app.delete("/delete/parameter/{Parameter_ID}", response_model=DeleteResponse)
+async def delete_parameter(Parameter_ID: int, db=Depends(get_db)) -> DeleteResponse:
+    async with db.cursor() as cur:
+        await cur.execute("SELECT Parameters_ID FROM Parameters WHERE Parameters_ID = %s", (Parameter_ID,))
+        if not await cur.fetchone():
+            raise HTTPException(status_code=404, detail="Parameter not found")
+        await cur.execute("DELETE FROM Parameters WHERE Parameters_ID = %s", (Parameter_ID,))
+        await db.commit()
+        return DeleteResponse(message="Parameter deleted successfully")
