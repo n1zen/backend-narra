@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from models import SensorData, Soil, Parameter, SoilParameterList
+from models import SensorData, Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem, AddParameter, DeleteParameter, DeleteResponse
 import aiomysql
 from datetime import datetime
 
@@ -48,8 +48,8 @@ async def get_soils(db=Depends(get_db)):
         return soils
 
 # Get parameters of a soil
-@app.get("/soils/parameters/{Soil_ID}", response_model=SoilParameterList)
-async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> SoilParameterList:
+@app.get("/soils/parameters/{Soil_ID}", response_model=List[Parameter])
+async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
     async with db.cursor() as cur:
         await cur.execute("SELECT Soil_ID, Soil_Name, ST_X(Soil_Location) as Loc_Longitude, ST_Y(Soil_Location) as Loc_Latitude FROM Soils WHERE Soil_ID = %s", (Soil_ID))
         row = await cur.fetchone()
@@ -77,11 +77,7 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> SoilParameterList:
                 Date_Recorded=formatDate(row[5])
             )
             parameters.append(parameter)
-        soil_parameters = SoilParameterList(
-            Soil = soil,
-            Parameters = parameters
-        )
-        return soil_parameters
+        return parameters
 
 # Get a parameter of a soil
 @app.get("/soils/parameters/{Soil_ID}/{Parameter_ID}", response_model=SoilParameterList )
@@ -115,3 +111,71 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Parameters = [parameter]
         )
         return soil_parameter
+
+@app.post('/create/soil/', response_model=CreateItem)
+async def create_soil(item: CreateItem, db=Depends(get_db)):
+    async with db.cursor() as cur:
+        try:
+            # Insert soil data
+            await cur.execute(
+                "INSERT INTO Soils (Soil_Name, Soil_Location) VALUES (%s, ST_GeomFromText('POINT(%s %s)', 4326))",
+                (item.Soil.Soil_Name, item.Soil.Loc_Longitude, item.Soil.Loc_Latitude)
+            )
+            await db.commit()
+            
+            # Get the inserted soil ID
+            await cur.execute("SELECT LAST_INSERT_ID()")
+            id_of_Soil = await cur.fetchone()
+            
+            # Insert parameter data
+            await cur.execute(
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
+                (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph)
+            )
+            await db.commit()
+            return item
+            
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to create soil and parameters: {str(e)}")
+
+@app.post('/add/parameter/', response_model=AddParameter)
+async def create_parameter(item: AddParameter, db=Depends(get_db)):
+    async with db.cursor() as cur:
+        # First check if the Soil_ID exists
+        await cur.execute("SELECT Soil_ID FROM Soils WHERE Soil_ID = %s", (item.Soil_ID,))
+        if not await cur.fetchone():
+            raise HTTPException(status_code=404, detail="Soil not found")
+        
+        try:
+            await cur.execute(
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
+                (item.Soil_ID, item.Hum, item.Temp, item.Ec, item.Ph)
+            )
+            await db.commit()
+            return item
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to create parameter: {str(e)}")
+
+@app.delete("/delete/soil/{Soil_ID}", response_model=DeleteResponse)
+async def delete_soil(Soil_ID: int, db=Depends(get_db)) -> DeleteResponse:
+    async with db.cursor() as cur:
+        await cur.execute("SELECT Soil_ID FROM Soils WHERE Soil_ID = %s", (Soil_ID,))
+        if not await cur.fetchone():
+            raise HTTPException(status_code=404, detail="Soil not found")
+        await cur.execute("DELETE FROM Parameters WHERE Soil_ID = %s", (Soil_ID,))
+        await db.commit()
+        await cur.execute("DELETE FROM Soils WHERE Soil_ID = %s", (Soil_ID,))
+        await db.commit()
+        return DeleteResponse(message="Soil deleted successfully")
+
+@app.delete("/delete/parameter/{Parameter_ID}", response_model=DeleteResponse)
+async def delete_parameter(Parameter_ID: int, db=Depends(get_db)) -> DeleteResponse:
+    async with db.cursor() as cur:
+        await cur.execute("SELECT Parameters_ID FROM Parameters WHERE Parameters_ID = %s", (Parameter_ID,))
+        if not await cur.fetchone():
+            raise HTTPException(status_code=404, detail="Parameter not found")
+        await cur.execute("DELETE FROM Parameters WHERE Parameters_ID = %s", (Parameter_ID,))
+        await db.commit()
+        return DeleteResponse(message="Parameter deleted successfully")
