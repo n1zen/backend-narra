@@ -29,3 +29,57 @@ An app that shows live feedback from soil sensor and access to a database, stori
 ### Back-End App Developers
 
 - Lead Developer: [**Louie Izen B. Torres**](https://github.com/n1zen)
+
+## Setting Up FastAPI App as a Service
+- Clone the repo
+
+```bash
+git clone https://github.com/n1zen/backend-narra.git
+```
+- Go to directory and install dependencies
+
+```bash
+cd backend-narra
+python3 -m venv venv
+source venv/bin/activate
+pip install fastapi uvicorn aiomysql python-dotenv
+```
+
+- Create service file
+```bash
+sudo nano /etc/systemd/system/cloudtree_api.service
+```
+- Add the following to the file
+```bash
+    [Unit]
+    Description=FastAPI application service
+    After=network.target
+
+    [Service]
+    User=pi
+    WorkingDirectory=/home/pi/my_fastapi_app
+    ExecStart=/home/pi/my_fastapi_app/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+    Restart=always
+    RestartSec=5
+    StandardOutput=syslog
+    StandardError=syslog
+    SyslogIdentifier=fastapi_app
+
+    [Install]
+    WantedBy=multi-user.target
+```
+- Reload. Enable. Start
+```bash
+sudo systemctl daemon-reload
+```
+```bash
+sudo systemctl enable cloudtree_api.service
+```
+```bash
+sudo systemctl start cloudtree_api.service
+```
+
+- Check status with this code
+```bash
+sudo systemctl status cloudtree_api.service
+```
