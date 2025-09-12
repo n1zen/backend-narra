@@ -29,6 +29,7 @@ An app that shows live feedback from soil sensor and access to a database, stori
 ### Back-End App Developers
 
 - Lead Developer: [**Louie Izen B. Torres**](https://github.com/n1zen)
+- Database Developer: [**Thed Justin D. Palting**](https://github.com/TheddySmolBoy)
 
 # Setting Up FastAPI App as a Service
 - Clone the repo
