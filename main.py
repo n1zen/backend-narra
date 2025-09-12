@@ -1,17 +1,21 @@
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
-from models import SensorData, Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem, AddParameter, DeleteParameter, DeleteResponse
+from models import Soil, Parameter, SoilParameterList, SoilCreate, ParameterCreate, CreateItem, AddParameter, DeleteParameter, DeleteResponse
 import aiomysql
+import os 
+from dotenv import load_dotenv
 from datetime import datetime
+
+load_dotenv()
 
 app = FastAPI()
 
 async def get_db():
     async with aiomysql.connect(
-        host="localhost",
-        user="pi",
-        password="raspi",
-        db="narra"
+        host=os.getenv("HOST"),
+        user=os.getenv("DEV_USER"),
+        password=os.getenv("DEV_PASSWORD"),
+        db=os.getenv("DEV_DB"),
     ) as conn:
         yield conn
 
@@ -61,7 +65,7 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
             Loc_Longitude = row[2],
             Loc_Latitude = row[3],
         )
-        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Date_Recorded FROM Parameters WHERE Soil_ID = %s", (Soil_ID))
+        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Comments, Date_Recorded FROM Parameters WHERE Soil_ID = %s", (Soil_ID))
         rows = await cur.fetchall()
         if not rows:
             raise HTTPException(status_code=404, detail="Soil Parameters not found")
@@ -74,7 +78,8 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
                 Temp=row[2],
                 Ec=row[3],
                 Ph=row[4],
-                Date_Recorded=formatDate(row[5])
+                Comments=row[5],
+                Date_Recorded=formatDate(row[6])
             )
             parameters.append(parameter)
         return parameters
@@ -93,7 +98,7 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Loc_Longitude = row[2],
             Loc_Latitude = row[3],
         )
-        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Date_Recorded FROM Parameters WHERE Parameters_ID = %s AND Soil_ID = %s", (Parameter_ID, Soil_ID))
+        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Comments, Date_Recorded FROM Parameters WHERE Parameters_ID = %s AND Soil_ID = %s", (Parameter_ID, Soil_ID))
         row = await cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Soil Parameter not found")
@@ -104,7 +109,8 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Temp=row[2],
             Ec=row[3],
             Ph=row[4],
-            Date_Recorded=formatDate(row[5])
+            Comments=row[5],
+            Date_Recorded=formatDate(row[6])
         )
         soil_parameter = SoilParameterList(
             Soil = soil,
@@ -129,8 +135,8 @@ async def create_soil(item: CreateItem, db=Depends(get_db)):
             
             # Insert parameter data
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
-                (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph)
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Comments)
             )
             await db.commit()
             return item
@@ -149,8 +155,8 @@ async def create_parameter(item: AddParameter, db=Depends(get_db)):
         
         try:
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH) VALUES (%s, %s, %s, %s, %s)",
-                (item.Soil_ID, item.Parameter.Hum, item.Parameter.Temp, item.Parameter.Ec, item.Parameter.Ph)
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                (item.Soil_ID, item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Comments)
             )
             await db.commit()
             return item
