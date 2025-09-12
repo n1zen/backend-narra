@@ -31,6 +31,24 @@ An app that shows live feedback from soil sensor and access to a database, stori
 - Lead Developer: [**Louie Izen B. Torres**](https://github.com/n1zen)
 - Database Developer: [**Thed Justin D. Palting**](https://github.com/TheddySmolBoy)
 
+
+
+# Setup Raspberry Pi
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y mosquitto mosquitto-clients
+sudo apt install mariadb-server
+sudo mysql_secure_installation
+```
+
+
+# Setting Up MariaDB
+
+> Work in progress...
+
+
 # Cloning the Repository
 
 - Clone the repo
@@ -49,6 +67,8 @@ pip install fastapi uvicorn aiomysql python-dotenv
 ```bash
 pip install pyserial paho-mqtt
 ```
+
+
 # Setting Up FastAPI App as a Service
 
 - Create service file
@@ -88,4 +108,73 @@ sudo systemctl start cloudtree_api.service
 - Check status with this code
 ```bash
 sudo systemctl status cloudtree_api.service
+```
+
+
+# Setting Up MQTT Service
+
+- Create file
+```bash
+sudo nano /etc/systemd/system/mqtt_sensor.service
+```
+```bash
+[Unit]
+Description=MQTT Sensor Publisher Service
+After=network.target
+
+[Service]
+Type=simple
+User=cloudtree
+WorkingDirectory=/home/cloudtree/backend-narra
+ExecStart=/home/cloudtree/backend-narra/venv/bin/python3 /home/cloudtree/backend-narra/mqtt_sensor.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Reload systemd and start the service
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable mqtt_sensor.service
+sudo systemctl start mqtt_sensor.service
+```
+
+- Check status
+```bash
+sudo systemctl status mqtt_sensor.service
+```
+
+
+# Setting Up UDP Service
+
+- Do the following:
+```bash
+sudo nano /etc/systemd/sysyem/broadcaster.service
+```
+```bash
+[Unit]
+Description=UDP Broadcaster Service
+After=network.target
+
+[Service]
+Type=simple
+User=cloudtree
+WorkingDirectory=/home/cloudtree/backend-narra
+ExecStart=/usr/bin/python3 /home/cloudtree/backend-narra/broadcaster.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Reload systemd and start the service
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable broadcaster.service
+sudo systemctl start broadcaster.service
+```
+- Check status
+```bash
+sudo systemctl status broadcaster.service
 ```
