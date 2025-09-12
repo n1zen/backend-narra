@@ -1,12 +1,6 @@
 from pydantic import BaseModel
 from typing import List
 
-class SensorData(BaseModel):
-    Moist: float
-    Temp: float
-    EC: float
-    pH: float
-
 class Soil(BaseModel):
     Soil_ID: str
     Soil_Name: str
@@ -20,6 +14,7 @@ class Parameter(BaseModel):
     Temp: float
     Ec: float
     Ph: float
+    Comments: str
     Date_Recorded: str
 
 class SoilParameterList(BaseModel):
@@ -31,6 +26,7 @@ class ParameterCreate(BaseModel):
     Temp: float
     Ec: float
     Ph: float
+    Comments: str
 
 class SoilCreate(BaseModel):
     Soil_Name: str
@@ -43,7 +39,7 @@ class CreateItem(BaseModel):
 
 class AddParameter(BaseModel):
     Soil_ID: int
-    Parameter: ParameterCreate
+    Parameters: ParameterCreate
 
 class DeleteParameter(BaseModel):
     Parameter_ID: int
