@@ -31,20 +31,25 @@ An app that shows live feedback from soil sensor and access to a database, stori
 - Lead Developer: [**Louie Izen B. Torres**](https://github.com/n1zen)
 - Database Developer: [**Thed Justin D. Palting**](https://github.com/TheddySmolBoy)
 
-# Setting Up FastAPI App as a Service
+# Cloning the Repository
+
 - Clone the repo
 
 ```bash
 git clone https://github.com/n1zen/backend-narra.git
 ```
-- Go to directory and install dependencies
-
+- Go to directory and install dependencies for FastAPI app
 ```bash
 cd backend-narra
 python3 -m venv venv
 source venv/bin/activate
-pip install fastapi uvicorn aiomysql python-dotenv
+pip install fastapi uvicorn aiomysql python-dotenv 
 ```
+- Install dependencies for MQTT service
+```bash
+pip install pyserial paho-mqtt
+```
+# Setting Up FastAPI App as a Service
 
 - Create service file
 ```bash
