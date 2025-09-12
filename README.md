@@ -30,7 +30,7 @@ An app that shows live feedback from soil sensor and access to a database, stori
 
 - Lead Developer: [**Louie Izen B. Torres**](https://github.com/n1zen)
 
-## Setting Up FastAPI App as a Service
+# Setting Up FastAPI App as a Service
 - Clone the repo
 
 ```bash
