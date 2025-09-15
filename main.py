@@ -15,7 +15,7 @@ async def get_db():
         host=os.getenv("HOST"),
         user=os.getenv("DEV_USER"),
         password=os.getenv("DEV_PASSWORD"),
-        db=os.getenv("DEV_DB"),
+        db=os.getenv("PROD_DB"),
     ) as conn:
         yield conn
 
