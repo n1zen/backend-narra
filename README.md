@@ -13,6 +13,7 @@ The project aims to provide an affordable and accessible solution for sustainabl
 ### Researchers
 
 - Jaylord T. Alipio
+- Ace Del Rosario
 - Jhon Genesis G. Madera
 - [**Thed Justin D. Palting**](https://github.com/TheddySmolBoy)
 - [**Louie Izen B. Torres**](https://github.com/n1zen)
