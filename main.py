@@ -15,7 +15,7 @@ async def get_db():
         host=os.getenv("HOST"),
         user=os.getenv("DEV_USER"),
         password=os.getenv("DEV_PASSWORD"),
-        db=os.getenv("DEV_DB"),
+        db=os.getenv("PROD_DB"),
     ) as conn:
         yield conn
 
@@ -80,7 +80,7 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
                 Ph=row[4],
                 Nitrogen=row[5],
                 Phosphorus=row[6],
-                Potassium=row[7]
+                Potassium=row[7],
                 Comments=row[8],
                 Date_Recorded=formatDate(row[9])
             )
@@ -114,7 +114,7 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Ph=row[4],
             Nitrogen=row[5],
             Phosphorus=row[6],
-            Potassium=row[7]
+            Potassium=row[7],
             Comments=row[8],
                 Date_Recorded=formatDate(row[9])
         )
