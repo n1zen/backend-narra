@@ -141,7 +141,7 @@ async def create_soil(item: CreateItem, db=Depends(get_db)):
             
             # Insert parameter data
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Nitrogen, item.Parameters.Phosphorus, item.Parameters.Potassium, item.Parameters.Comments)
             )
             await db.commit()
@@ -161,7 +161,7 @@ async def create_parameter(item: AddParameter, db=Depends(get_db)):
         
         try:
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (item.Soil_ID, item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Nitrogen, item.Parameters.Phosphorus, item.Parameters.Potassium, item.Parameters.Comments)
             )
             await db.commit()

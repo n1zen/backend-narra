@@ -29,6 +29,9 @@ class ParameterCreate(BaseModel):
     Temp: float
     Ec: float
     Ph: float
+    Nitrogen: float
+    Phosphorus: float
+    Potassium: float
     Comments: str
 
 class SoilCreate(BaseModel):
