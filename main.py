@@ -65,7 +65,7 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
             Loc_Longitude = row[2],
             Loc_Latitude = row[3],
         )
-        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Comments, Date_Recorded FROM Parameters WHERE Soil_ID = %s", (Soil_ID))
+        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments, Date_Recorded FROM Parameters WHERE Soil_ID = %s", (Soil_ID))
         rows = await cur.fetchall()
         if not rows:
             raise HTTPException(status_code=404, detail="Soil Parameters not found")
@@ -78,8 +78,11 @@ async def get_parameters(Soil_ID: int, db=Depends(get_db)) -> List[Parameter]:
                 Temp=row[2],
                 Ec=row[3],
                 Ph=row[4],
-                Comments=row[5],
-                Date_Recorded=formatDate(row[6])
+                Nitrogen=row[5],
+                Phosphorus=row[6],
+                Potassium=row[7]
+                Comments=row[8],
+                Date_Recorded=formatDate(row[9])
             )
             parameters.append(parameter)
         return parameters
@@ -98,7 +101,7 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Loc_Longitude = row[2],
             Loc_Latitude = row[3],
         )
-        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, Comments, Date_Recorded FROM Parameters WHERE Parameters_ID = %s AND Soil_ID = %s", (Parameter_ID, Soil_ID))
+        await cur.execute("SELECT Parameters_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM Comments, Date_Recorded FROM Parameters WHERE Parameters_ID = %s AND Soil_ID = %s", (Parameter_ID, Soil_ID))
         row = await cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Soil Parameter not found")
@@ -109,8 +112,11 @@ async def get_specific_parameter(Soil_ID: int, Parameter_ID: int, db=Depends(get
             Temp=row[2],
             Ec=row[3],
             Ph=row[4],
-            Comments=row[5],
-            Date_Recorded=formatDate(row[6])
+            Nitrogen=row[5],
+            Phosphorus=row[6],
+            Potassium=row[7]
+            Comments=row[8],
+                Date_Recorded=formatDate(row[9])
         )
         soil_parameter = SoilParameterList(
             Soil = soil,
@@ -135,8 +141,8 @@ async def create_soil(item: CreateItem, db=Depends(get_db)):
             
             # Insert parameter data
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
-                (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Comments)
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                (id_of_Soil[0], item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Nitrogen, item.Parameters.Phosphorus, item.Parameters.Potassium, item.Parameters.Comments)
             )
             await db.commit()
             return item
@@ -155,8 +161,8 @@ async def create_parameter(item: AddParameter, db=Depends(get_db)):
         
         try:
             await cur.execute(
-                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
-                (item.Soil_ID, item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Comments)
+                "INSERT INTO Parameters (Soil_ID, HUM, TEMP, EC, PH, NITROGEN, PHOSPHORUS, POTASSIUM, Comments) VALUES (%s, %s, %s, %s, %s, %s)",
+                (item.Soil_ID, item.Parameters.Hum, item.Parameters.Temp, item.Parameters.Ec, item.Parameters.Ph, item.Parameters.Nitrogen, item.Parameters.Phosphorus, item.Parameters.Potassium, item.Parameters.Comments)
             )
             await db.commit()
             return item

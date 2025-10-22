@@ -14,6 +14,9 @@ class Parameter(BaseModel):
     Temp: float
     Ec: float
     Ph: float
+    Nitrogen: float
+    Phosphorus: float
+    Potassium: float
     Comments: str
     Date_Recorded: str
 
