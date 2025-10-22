@@ -1,5 +1,4 @@
 import serial
-# def get_sensor_data(mqtt_client):
 def get_sensor_data(mqtt_client):
 	ser = serial.Serial('/dev/ttyUSB0',9600,timeout=1)
 	ser.reset_input_buffer()
