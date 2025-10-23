@@ -1,6 +1,6 @@
 # Narra Soil Sensor App (BACKEND APP)
 
-This is the backend app for the [**Narra Soil Sensor App**](https://github.com/n1zen/NarraApp)
+This is the backend app for the [**Narra Soil Sensor App**](https://github.com/n1zen/CloudTree)
 
 ## MCU-Based Soil Scanner with Machine Learning Application for Finding Locations Suitable for Planting Narra Trees
 
