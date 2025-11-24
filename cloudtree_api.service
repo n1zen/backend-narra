@@ -5,7 +5,7 @@
     [Service]
     User=pi
     WorkingDirectory=/home/pi/my_fastapi_app
-    ExecStart=/home/pi/my_fastapi_app/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+    ExecStart=/home/pi/my_fastapi_app/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8080
     Restart=always
     RestartSec=5
     StandardOutput=syslog
